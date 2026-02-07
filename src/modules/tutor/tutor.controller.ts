@@ -3,13 +3,14 @@ import { TutorService } from "./tutor.service";
 
 const updateTutorProfile = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const { bio, hourlyRate, experience } = req.body;
+    const userId = req.user!.id;
+    const { bio, hourlyRate, experience, availability } = req.body;
 
-    const result = await TutorService.updateTutorProfile(id as string, {
+    const result = await TutorService.updateTutorProfile(userId, {
       bio,
       hourlyRate,
       experience,
+      availability,
     });
 
     res.status(200).json({

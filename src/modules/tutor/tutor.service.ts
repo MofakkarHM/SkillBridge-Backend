@@ -1,4 +1,4 @@
-import { TutorProfile } from "../../../generated/prisma/client";
+import { Prisma, TutorProfile } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 
 const getTutorProfile = async (userId: string) => {
@@ -14,6 +14,16 @@ const getTutorProfile = async (userId: string) => {
           image: true,
         },
       },
+      receivedReviews: {
+        select: {
+          rating: true,
+          comment: true,
+          createdAt: true,
+          student: {
+            select: { name: true, image: true },
+          },
+        },
+      },
     },
   });
 
@@ -22,21 +32,24 @@ const getTutorProfile = async (userId: string) => {
 
 const updateTutorProfile = async (
   userId: string,
-  data: Partial<TutorProfile>,
+  data: Prisma.TutorProfileUncheckedUpdateInput,
 ) => {
   const result = await prisma.tutorProfile.upsert({
     where: {
       userId: userId,
     },
-    update: data as any,
+
+    update: data,
 
     create: {
       userId: userId,
-      bio: data.bio || "",
-      hourlyRate: data.hourlyRate || 0,
-      experience: data.experience || 0,
+      bio: (data.bio as string) || "",
+      hourlyRate: (data.hourlyRate as number) || 0,
+      experience: (data.experience as number) || 0,
+      availability: (data.availability as string) || "",
     },
   });
+
   return result;
 };
 
@@ -47,8 +60,10 @@ const getAllTutors = async () => {
         select: {
           name: true,
           image: true,
+          headline: true,
         },
       },
+      categories: true,
     },
   });
 
