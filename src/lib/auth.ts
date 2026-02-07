@@ -4,10 +4,35 @@ import { prisma } from "./prisma";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
-    provider: "postgresql", // or "mysql", "postgresql", ...etc
+    provider: "postgresql",
   }),
-  trustedOrigins: [process.env.APP_URL!],
+  trustedOrigins: [process.env.APP_URL || "http://localhost:3000"],
+
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        defaultValue: "STUDENT",
+        required: false,
+        input: false,
+      },
+    },
+  },
+
   emailAndPassword: {
     enabled: true,
+    autoSignIn: true,
+  },
+
+  callbacks: {
+    session: async ({ session, user }: { session: any; user: any }) => {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          role: (user as any).role,
+        },
+      };
+    },
   },
 });

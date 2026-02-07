@@ -5,6 +5,7 @@ import cors from "cors";
 import { CategoryRoutes } from "./modules/category/category.route";
 import { TutorRoutes } from "./modules/tutor/tutor.route";
 import { BookingRoutes } from "./modules/booking/booking.route";
+import { ReviewRoutes } from "./modules/review/review.route";
 
 const app: Application = express();
 
@@ -18,6 +19,8 @@ app.use("/api/categories", CategoryRoutes);
 app.use("/api/tutors", TutorRoutes);
 
 app.use("/api/bookings", BookingRoutes);
+
+app.use("/api/reviews", ReviewRoutes);
 
 app.get("/", (req, res) => {
   res.send("SkillBridge API is running");
