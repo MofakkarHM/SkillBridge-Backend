@@ -3,8 +3,19 @@ import { prisma } from "../../lib/prisma";
 
 const createBooking = async (
   studentId: string,
-  data: Pick<Booking, "tutorId" | "date">,
+  data: {
+    tutorId: string;
+    date: Date;
+  },
 ) => {
+  const tutor = await prisma.tutorProfile.findUnique({
+    where: { id: data.tutorId },
+  });
+
+  if (!tutor) {
+    throw new Error("Tutor not found");
+  }
+
   const result = await prisma.booking.create({
     data: {
       studentId: studentId,
