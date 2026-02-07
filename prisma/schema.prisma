@@ -14,27 +14,25 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   name          String
-  email         String    @unique
+  email         String   @unique
   emailVerified Boolean?
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   // CUSTOM FIELDS FOR SKILLBRIDGE
-  role          UserRole  @default(STUDENT)
-  headline      String?   // e.g. "Math Enthusiast" or "Expert Python Tutor"
-  
+  role         UserRole      @default(STUDENT)
+  headline     String? // e.g. "Math Enthusiast" or "Expert Python Tutor"
   // RELATIONS
-  sessions      Session[]
-  accounts      Account[]
-  
+  sessions     Session[]
+  accounts     Account[]
   // SkillBridge Relations
-  tutorProfile  TutorProfile? // Only if role is TUTOR
-  bookings      Booking[]     @relation("StudentBookings") // Bookings made by this user (as student)
-  reviews       Review[]      // Reviews written by this user
-  
+  tutorProfile TutorProfile? // Only if role is TUTOR
+  bookings     Booking[]     @relation("StudentBookings") // Bookings made by this user (as student)
+  reviews      Review[] // Reviews written by this user
+
   @@map("user")
 }
 
@@ -48,9 +46,10 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("session")
+  @@index([userId])
 }
 
 model Account {
@@ -63,9 +62,17 @@ model Account {
   expiresAt    DateTime?
   password     String?
 
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   @@map("account")
+  @@index([userId])
 }
 
 model Verification {
@@ -77,6 +84,7 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+  @@index([identifier])
 }
 
 // ==============================
@@ -90,43 +98,40 @@ enum UserRole {
 }
 
 model TutorProfile {
-  id           String   @id @default(uuid())
-  userId       String   @unique // One profile per user
-  bio          String
-  hourlyRate   Float
-  experience   Int      // Years of experience
-  
+  id              String     @id @default(uuid())
+  userId          String     @unique // One profile per user
+  bio             String
+  hourlyRate      Float
+  experience      Int // Years of experience
   // Relations
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  categories   Category[] // Subjects this tutor teaches
-  tutorBookings Booking[] @relation("TutorBookings") // Bookings received by this tutor
-  receivedReviews Review[] @relation("TutorReviews") // Reviews received by this tutor
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories      Category[] // Subjects this tutor teaches
+  tutorBookings   Booking[]  @relation("TutorBookings") // Bookings received by this tutor
+  receivedReviews Review[]   @relation("TutorReviews") // Reviews received by this tutor
 
   @@map("tutor_profiles")
 }
 
 model Category {
-  id          String   @id @default(uuid())
-  name        String   @unique // e.g. "Mathematics", "Coding"
+  id          String         @id @default(uuid())
+  name        String         @unique // e.g. "Mathematics", "Coding"
   description String?
-  
   tutors      TutorProfile[] // Many tutors can belong to a category
 
   @@map("categories")
 }
 
 model Booking {
-  id        String   @id @default(uuid())
+  id        String        @id @default(uuid())
   studentId String
-  tutorId   String   // Links to TutorProfile
+  tutorId   String // Links to TutorProfile
   date      DateTime // Scheduled date/time
   status    BookingStatus @default(PENDING)
-  
-  createdAt DateTime @default(now())
+  createdAt DateTime      @default(now())
 
   // Relations
-  student   User         @relation("StudentBookings", fields: [studentId], references: [id])
-  tutor     TutorProfile @relation("TutorBookings", fields: [tutorId], references: [id])
+  student User         @relation("StudentBookings", fields: [studentId], references: [id])
+  tutor   TutorProfile @relation("TutorBookings", fields: [tutorId], references: [id])
 
   @@map("bookings")
 }
@@ -142,13 +147,13 @@ model Review {
   id        String   @id @default(uuid())
   studentId String
   tutorId   String
-  rating    Int      // 1-5 stars
+  rating    Int // 1-5 stars
   comment   String
   createdAt DateTime @default(now())
 
   // Relations
-  student   User         @relation(fields: [studentId], references: [id])
-  tutor     TutorProfile @relation("TutorReviews", fields: [tutorId], references: [id])
+  student User         @relation(fields: [studentId], references: [id])
+  tutor   TutorProfile @relation("TutorReviews", fields: [tutorId], references: [id])
 
   @@map("reviews")
 }
