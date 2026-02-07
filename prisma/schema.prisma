@@ -12,3 +12,145 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // CUSTOM FIELDS FOR SKILLBRIDGE
+  role          UserRole  @default(STUDENT)
+  headline      String?   // e.g. "Math Enthusiast" or "Expert Python Tutor"
+  
+  // RELATIONS
+  sessions      Session[]
+  accounts      Account[]
+  
+  // SkillBridge Relations
+  tutorProfile  TutorProfile? // Only if role is TUTOR
+  bookings      Booking[]     @relation("StudentBookings") // Bookings made by this user (as student)
+  reviews       Review[]      // Reviews written by this user
+  
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id           String    @id @default(uuid())
+  userId       String
+  accountId    String
+  providerId   String
+  accessToken  String?
+  refreshToken String?
+  expiresAt    DateTime?
+  password     String?
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+// ==============================
+// 2. SKILLBRIDGE SPECIFIC TABLES
+// ==============================
+
+enum UserRole {
+  STUDENT
+  TUTOR
+  ADMIN
+}
+
+model TutorProfile {
+  id           String   @id @default(uuid())
+  userId       String   @unique // One profile per user
+  bio          String
+  hourlyRate   Float
+  experience   Int      // Years of experience
+  
+  // Relations
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories   Category[] // Subjects this tutor teaches
+  tutorBookings Booking[] @relation("TutorBookings") // Bookings received by this tutor
+  receivedReviews Review[] @relation("TutorReviews") // Reviews received by this tutor
+
+  @@map("tutor_profiles")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique // e.g. "Mathematics", "Coding"
+  description String?
+  
+  tutors      TutorProfile[] // Many tutors can belong to a category
+
+  @@map("categories")
+}
+
+model Booking {
+  id        String   @id @default(uuid())
+  studentId String
+  tutorId   String   // Links to TutorProfile
+  date      DateTime // Scheduled date/time
+  status    BookingStatus @default(PENDING)
+  
+  createdAt DateTime @default(now())
+
+  // Relations
+  student   User         @relation("StudentBookings", fields: [studentId], references: [id])
+  tutor     TutorProfile @relation("TutorBookings", fields: [tutorId], references: [id])
+
+  @@map("bookings")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  studentId String
+  tutorId   String
+  rating    Int      // 1-5 stars
+  comment   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  student   User         @relation(fields: [studentId], references: [id])
+  tutor     TutorProfile @relation("TutorReviews", fields: [tutorId], references: [id])
+
+  @@map("reviews")
+}
+
+
