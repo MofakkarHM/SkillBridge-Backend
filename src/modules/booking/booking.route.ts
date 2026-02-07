@@ -1,6 +1,7 @@
 import express, { Router } from "express";
 import { BookingController } from "./booking.controller";
-import auth, { UserRole } from "../../middlewares/auth";
+import { UserRole } from "../../enums/role.enum";
+import auth from "../../middlewares/auth";
 
 const router = express.Router();
 
