@@ -22,18 +22,23 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  // CUSTOM FIELDS FOR SKILLBRIDGE
+  
   role         UserRole      @default(STUDENT)
-  headline     String? // e.g. "Math Enthusiast" or "Expert Python Tutor"
-  // RELATIONS
+  status       UserStatus    @default(ACTIVE)
+  headline     String? 
   sessions     Session[]
   accounts     Account[]
-  // SkillBridge Relations
-  tutorProfile TutorProfile? // Only if role is TUTOR
-  bookings     Booking[]     @relation("StudentBookings") // Bookings made by this user (as student)
-  reviews      Review[] // Reviews written by this user
+ 
+  tutorProfile TutorProfile? 
+  bookings     Booking[]     @relation("StudentBookings") 
+  reviews      Review[]  
 
   @@map("user")
+}
+
+enum UserStatus{
+  ACTIVE
+  BLOCKED
 }
 
 model Session {
@@ -87,9 +92,6 @@ model Verification {
   @@index([identifier])
 }
 
-// ==============================
-// 2. SKILLBRIDGE SPECIFIC TABLES
-// ==============================
 
 enum UserRole {
   STUDENT
@@ -99,24 +101,25 @@ enum UserRole {
 
 model TutorProfile {
   id              String     @id @default(uuid())
-  userId          String     @unique // One profile per user
+  userId          String     @unique 
   bio             String
   hourlyRate      Float
-  experience      Int // Years of experience
-  // Relations
+  experience      Int 
+  availability    String?
+ 
   user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  categories      Category[] // Subjects this tutor teaches
-  tutorBookings   Booking[]  @relation("TutorBookings") // Bookings received by this tutor
-  receivedReviews Review[]   @relation("TutorReviews") // Reviews received by this tutor
+  categories      Category[] 
+  tutorBookings   Booking[]  @relation("TutorBookings") 
+  receivedReviews Review[]   @relation("TutorReviews") 
 
   @@map("tutor_profiles")
 }
 
 model Category {
   id          String         @id @default(uuid())
-  name        String         @unique // e.g. "Mathematics", "Coding"
+  name        String         @unique 
   description String?
-  tutors      TutorProfile[] // Many tutors can belong to a category
+  tutors      TutorProfile[] 
 
   @@map("categories")
 }
@@ -124,12 +127,12 @@ model Category {
 model Booking {
   id        String        @id @default(uuid())
   studentId String
-  tutorId   String // Links to TutorProfile
-  date      DateTime // Scheduled date/time
+  tutorId   String 
+  date      DateTime 
   status    BookingStatus @default(PENDING)
   createdAt DateTime      @default(now())
 
-  // Relations
+ 
   student User         @relation("StudentBookings", fields: [studentId], references: [id])
   tutor   TutorProfile @relation("TutorBookings", fields: [tutorId], references: [id])
 
@@ -147,11 +150,11 @@ model Review {
   id        String   @id @default(uuid())
   studentId String
   tutorId   String
-  rating    Int // 1-5 stars
+  rating    Int 
   comment   String
   createdAt DateTime @default(now())
 
-  // Relations
+ 
   student User         @relation(fields: [studentId], references: [id])
   tutor   TutorProfile @relation("TutorReviews", fields: [tutorId], references: [id])
 
