@@ -53,8 +53,36 @@ const updateTutorProfile = async (
   return result;
 };
 
-const getAllTutors = async () => {
+const getAllTutors = async (query: Record<string, unknown>) => {
+  const { searchTerm, minPrice, maxPrice, subject } = query;
+
+  const whereConditions: Prisma.TutorProfileWhereInput = {};
+
+  if (searchTerm) {
+    const term = searchTerm as string;
+    whereConditions.OR = [
+      { bio: { contains: term, mode: "insensitive" } },
+      { user: { name: { contains: term, mode: "insensitive" } } },
+      {
+        categories: { some: { name: { contains: term, mode: "insensitive" } } },
+      },
+    ];
+  }
+
+  if (subject) {
+    whereConditions.categories = {
+      some: { name: { equals: subject as string, mode: "insensitive" } },
+    };
+  }
+
+  if (minPrice || maxPrice) {
+    whereConditions.hourlyRate = {};
+    if (minPrice) whereConditions.hourlyRate.gte = Number(minPrice);
+    if (maxPrice) whereConditions.hourlyRate.lte = Number(maxPrice);
+  }
+
   const result = await prisma.tutorProfile.findMany({
+    where: whereConditions,
     include: {
       user: {
         select: {
@@ -64,6 +92,9 @@ const getAllTutors = async () => {
         },
       },
       categories: true,
+      receivedReviews: {
+        select: { rating: true },
+      },
     },
   });
 
