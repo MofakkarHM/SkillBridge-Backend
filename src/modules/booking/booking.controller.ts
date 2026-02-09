@@ -1,7 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { BookingService } from "./booking.service";
 
-const createBooking = async (req: Request, res: Response) => {
+const createBooking = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const studentId = req.user!.id;
     const { tutorId, date } = req.body;
@@ -17,15 +21,15 @@ const createBooking = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error creating booking",
-      error: err,
-    });
+    next(err);
   }
 };
 
-const getAllBookings = async (req: Request, res: Response) => {
+const getAllBookings = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const result = await BookingService.getAllBookings();
 
@@ -35,15 +39,15 @@ const getAllBookings = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching bookings",
-      error: err,
-    });
+    next(err);
   }
 };
 
-const getMyBookings = async (req: Request, res: Response) => {
+const getMyBookings = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user!.id;
     const role = req.user!.role;
@@ -56,11 +60,7 @@ const getMyBookings = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching my bookings",
-      error: err,
-    });
+    next(err);
   }
 };
 

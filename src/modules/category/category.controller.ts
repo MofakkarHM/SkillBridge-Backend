@@ -1,7 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { CategoryService } from "./category.service";
 
-const createCategory = async (req: Request, res: Response) => {
+const createCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { name, description } = req.body;
     if (!name) {
@@ -20,15 +24,15 @@ const createCategory = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error creating category",
-      err,
-    });
+    next(err);
   }
 };
 
-const getAllCategories = async (req: Request, res: Response) => {
+const getAllCategories = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const result = await CategoryService.getAllCategoryFromDb();
 
@@ -38,14 +42,15 @@ const getAllCategories = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching categories",
-      err,
-    });
+    next(err);
   }
 };
-const updateCategory = async (req: Request, res: Response) => {
+
+const updateCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
     const result = await CategoryService.updateCategoryIntoDb(
@@ -59,14 +64,15 @@ const updateCategory = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error updating categories",
-      err,
-    });
+    next(err);
   }
 };
-const deleteCategory = async (req: Request, res: Response) => {
+
+const deleteCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
     const result = await CategoryService.deleteCategoryFromDb(id as string);
@@ -77,11 +83,7 @@ const deleteCategory = async (req: Request, res: Response) => {
       data: null,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error deleting categories",
-      err,
-    });
+    next(err);
   }
 };
 

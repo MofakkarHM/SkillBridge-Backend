@@ -1,7 +1,7 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { UserService } from "./user.service";
 
-const getAllUsers = async (req: Request, res: Response) => {
+const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await UserService.getAllUsers();
 
@@ -11,15 +11,15 @@ const getAllUsers = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching users",
-      error: err,
-    });
+    next(err);
   }
 };
 
-const updateUserStatus = async (req: Request, res: Response) => {
+const updateUserStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -32,11 +32,7 @@ const updateUserStatus = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error updating user status",
-      error: err,
-    });
+    next(err);
   }
 };
 

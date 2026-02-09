@@ -1,9 +1,13 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { ReviewService } from "./review.service";
 
-const createReview = async (req: Request, res: Response) => {
+const createReview = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    const studentId = req.user!.id; // From Auth Middleware
+    const studentId = req.user!.id;
     const { tutorId, rating, comment } = req.body;
 
     const result = await ReviewService.createReview(studentId, {
@@ -18,15 +22,15 @@ const createReview = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error creating review",
-      error: err,
-    });
+    next(err);
   }
 };
 
-const getTutorReviews = async (req: Request, res: Response) => {
+const getTutorReviews = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { tutorId } = req.params;
     const result = await ReviewService.getTutorReviews(tutorId as string);
@@ -37,11 +41,7 @@ const getTutorReviews = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching reviews",
-      error: err,
-    });
+    next(err);
   }
 };
 

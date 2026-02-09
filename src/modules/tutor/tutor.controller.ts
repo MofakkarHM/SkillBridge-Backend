@@ -1,7 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { TutorService } from "./tutor.service";
 
-const updateTutorProfile = async (req: Request, res: Response) => {
+const updateTutorProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user!.id;
     const { bio, hourlyRate, experience, availability } = req.body;
@@ -19,15 +23,15 @@ const updateTutorProfile = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error updating tutor profile",
-      error: err,
-    });
+    next(err);
   }
 };
 
-const getTutorProfile = async (req: Request, res: Response) => {
+const getTutorProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { userId } = req.params;
     const result = await TutorService.getTutorProfile(userId as string);
@@ -38,15 +42,15 @@ const getTutorProfile = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching tutor profile",
-      error: err,
-    });
+    next(err);
   }
 };
 
-const getAllTutors = async (req: Request, res: Response) => {
+const getAllTutors = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const result = await TutorService.getAllTutors();
 
@@ -56,11 +60,7 @@ const getAllTutors = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching tutors",
-      error: err,
-    });
+    next(err);
   }
 };
 
