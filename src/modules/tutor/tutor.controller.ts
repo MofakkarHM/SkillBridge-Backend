@@ -52,7 +52,7 @@ const getAllTutors = async (
   next: NextFunction,
 ) => {
   try {
-    const result = await TutorService.getAllTutors();
+    const result = await TutorService.getAllTutors(req.query);
 
     res.status(200).json({
       success: true,

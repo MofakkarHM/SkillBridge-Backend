@@ -7,6 +7,31 @@ const getAllUsers = async () => {
   });
 };
 
+const getMyProfile = async (id: string) => {
+  return await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      image: true,
+      status: true,
+      createdAt: true,
+    },
+  });
+};
+
+const updateMyProfile = async (
+  id: string,
+  data: { name?: string; image?: string },
+) => {
+  return await prisma.user.update({
+    where: { id },
+    data,
+  });
+};
+
 const updateUserStatus = async (userId: string, status: UserStatus) => {
   return await prisma.user.update({
     where: { id: userId },
@@ -17,4 +42,6 @@ const updateUserStatus = async (userId: string, status: UserStatus) => {
 export const UserService = {
   getAllUsers,
   updateUserStatus,
+  getMyProfile,
+  updateMyProfile,
 };

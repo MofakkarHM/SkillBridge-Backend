@@ -5,6 +5,18 @@ import { UserRole } from "../../enums/role.enum";
 
 const router = express.Router();
 
+router.get(
+  "/me",
+  auth(UserRole.STUDENT, UserRole.ADMIN, UserRole.TUTOR),
+  UserController.getMyProfile,
+);
+
+router.patch(
+  "/me",
+  auth(UserRole.ADMIN, UserRole.STUDENT, UserRole.TUTOR),
+  UserController.updateMyProfile,
+);
+
 router.get("/", auth(UserRole.ADMIN), UserController.getAllUsers);
 
 router.patch(
