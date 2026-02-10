@@ -1,9 +1,12 @@
 import { prisma } from "../../lib/prisma";
-import { UserStatus } from "../../../generated/prisma/client";
+import { UserStatus } from "@prisma/client";
 
 const getAllUsers = async () => {
   return await prisma.user.findMany({
     orderBy: { createdAt: "desc" },
+    include: {
+      tutorProfile: true,
+    },
   });
 };
 
@@ -11,20 +14,14 @@ const getMyProfile = async (id: string) => {
   return await prisma.user.findUnique({
     where: { id },
     select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      image: true,
-      status: true,
-      createdAt: true,
+      tutorProfile: true,
     },
   });
 };
 
 const updateMyProfile = async (
   id: string,
-  data: { name?: string; image?: string },
+  data: { name?: string; image?: string; headLine?: string },
 ) => {
   return await prisma.user.update({
     where: { id },

@@ -1,16 +1,25 @@
-import { Booking, BookingStatus } from "../../../generated/prisma/client";
+import { Booking, BookingStatus } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 
 const createBooking = async (
   studentId: string,
   data: {
     tutorId: string;
-    date: Date;
+    startDate: Date;
+    endDate: Date;
   },
 ) => {
-  const tutor = await prisma.tutorProfile.findUnique({
+  let tutor = await prisma.tutorProfile.findUnique({
     where: { id: data.tutorId },
   });
+
+  if (!tutor) {
+    tutor = await prisma.tutorProfile.findUnique({
+      where: {
+        userId: data.tutorId,
+      },
+    });
+  }
 
   if (!tutor) {
     throw new Error("Tutor not found");
@@ -20,7 +29,8 @@ const createBooking = async (
     data: {
       studentId: studentId,
       tutorId: data.tutorId,
-      date: data.date,
+      startDate: data.startDate,
+      endDate: data.endDate,
       status: BookingStatus.PENDING,
     },
   });
@@ -35,7 +45,9 @@ const getMyBookings = async (userId: string, role: string) => {
       },
       include: {
         tutor: {
-          include: { user: { select: { name: true, email: true } } },
+          include: {
+            user: { select: { name: true, email: true, image: true } },
+          },
         },
       },
     });
@@ -64,8 +76,8 @@ const getMyBookings = async (userId: string, role: string) => {
 const getAllBookings = async () => {
   return await prisma.booking.findMany({
     include: {
-      student: { select: { name: true } },
-      tutor: { include: { user: { select: { name: true } } } },
+      student: { select: { name: true, email: true } },
+      tutor: { include: { user: { select: { name: true, email: true } } } },
     },
   });
 };

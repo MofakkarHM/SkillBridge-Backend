@@ -8,11 +8,12 @@ const createBooking = async (
 ) => {
   try {
     const studentId = req.user!.id;
-    const { tutorId, date } = req.body;
+    const { tutorId, startDate, endDate } = req.body;
 
     const result = await BookingService.createBooking(studentId, {
       tutorId,
-      date: new Date(date),
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
     });
 
     res.status(200).json({

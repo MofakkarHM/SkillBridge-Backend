@@ -1,4 +1,4 @@
-import { Prisma, TutorProfile } from "../../../generated/prisma/client";
+import { Prisma, TutorProfile } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 
 const getTutorProfile = async (userId: string) => {
@@ -14,6 +14,7 @@ const getTutorProfile = async (userId: string) => {
           image: true,
         },
       },
+      categories: true,
       receivedReviews: {
         select: {
           rating: true,
@@ -30,23 +31,37 @@ const getTutorProfile = async (userId: string) => {
   return result;
 };
 
-const updateTutorProfile = async (
-  userId: string,
-  data: Prisma.TutorProfileUncheckedUpdateInput,
-) => {
+const updateTutorProfile = async (userId: string, data: any) => {
+  const { categoryId, ...otherData } = data;
+
   const result = await prisma.tutorProfile.upsert({
     where: {
       userId: userId,
     },
 
-    update: data,
+    update: {
+      bio: otherData.bio,
+      hourlyRate: otherData.hourlyRate,
+      experience: otherData.experience,
+      availability: otherData.availability,
+      ...(categoryId && {
+        categories: {
+          set: [{ id: categoryId }],
+        },
+      }),
+    },
 
     create: {
       userId: userId,
-      bio: (data.bio as string) || "",
-      hourlyRate: (data.hourlyRate as number) || 0,
-      experience: (data.experience as number) || 0,
-      availability: (data.availability as string) || "",
+      bio: (otherData.bio as string) || "",
+      hourlyRate: (otherData.hourlyRate as number) || 0,
+      experience: (otherData.experience as number) || 0,
+      availability: (otherData.availability as string) || "",
+      ...(categoryId && {
+        categories: {
+          connect: { id: categoryId },
+        },
+      }),
     },
   });
 

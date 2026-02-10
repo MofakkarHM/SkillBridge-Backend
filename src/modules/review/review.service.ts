@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { BookingStatus } from "../../../generated/prisma/client";
+import { BookingStatus } from "@prisma/client";
 
 const createReview = async (
   studentId: string,

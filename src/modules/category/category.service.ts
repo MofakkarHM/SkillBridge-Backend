@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { Category } from "../../../generated/prisma/client";
+import { Category } from "@prisma/client";
 
 const createCategoryIntoDb = async (
   data: Pick<Category, "name" | "description">,
